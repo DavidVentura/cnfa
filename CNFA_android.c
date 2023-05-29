@@ -41,7 +41,7 @@ struct CNFADriverAndroid
 	SLPlayItf playerPlay;
 	SLObjectItf playerObject;
 	SLObjectItf outputMixObject;
- 
+
 	SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 	SLAndroidSimpleBufferQueueItf playerBufferQueue;
 	//unsigned recorderSize;
@@ -95,8 +95,8 @@ static struct CNFADriverAndroid* InitAndroidDriver( struct CNFADriverAndroid * r
 
 		SLDataFormat_PCM format_pcm ={
 			SL_DATAFORMAT_PCM,
-			r->channelsPlay,
-			r->spsPlay*1000,
+			(SLuint32)r->channelsPlay,
+			(SLuint32)r->spsPlay*1000,
 			SL_PCMSAMPLEFORMAT_FIXED_16,
 			SL_PCMSAMPLEFORMAT_FIXED_16,
 			(r->channelsPlay==1)?SL_SPEAKER_FRONT_CENTER:3,
@@ -158,8 +158,8 @@ static struct CNFADriverAndroid* InitAndroidDriver( struct CNFADriverAndroid * r
 		// configure audio sink
 		SLDataFormat_PCM format_pcm ={
 			SL_DATAFORMAT_PCM,
-			r->channelsRec, 
-			r->spsRec*1000,
+			(SLuint32)r->channelsRec,
+			(SLuint32)r->spsRec*1000,
 			SL_PCMSAMPLEFORMAT_FIXED_16,
 			SL_PCMSAMPLEFORMAT_FIXED_16,
 			(r->channelsRec==1)?SL_SPEAKER_FRONT_CENTER:3,
@@ -208,7 +208,7 @@ static struct CNFADriverAndroid* InitAndroidDriver( struct CNFADriverAndroid * r
 		assert(SL_RESULT_SUCCESS == result); (void)result;
 		result = (*r->playerBufferQueue)->Clear(r->playerBufferQueue);
 		assert(SL_RESULT_SUCCESS == result); (void)result;
-		r->playerBuffer = malloc( r->playerBufferSizeBytes );
+		r->playerBuffer = (short*)malloc( r->playerBufferSizeBytes );
 		memset( r->playerBuffer, 0, r->playerBufferSizeBytes );
 		result = (*r->playerBufferQueue)->Enqueue(r->playerBufferQueue, r->playerBuffer, r->playerBufferSizeBytes );
 		assert(SL_RESULT_SUCCESS == result); (void)result;
@@ -225,7 +225,7 @@ static struct CNFADriverAndroid* InitAndroidDriver( struct CNFADriverAndroid * r
 		assert(SL_RESULT_SUCCESS == result); (void)result;
 		// the buffer is not valid for playback yet
 
-		r->recorderBuffer = malloc( r->recorderBufferSizeBytes );
+		r->recorderBuffer = (short*)malloc( r->recorderBufferSizeBytes );
 
 		// enqueue an empty buffer to be filled by the recorder
 		// (for streaming recording, we would enqueue at least 2 empty buffers to start things off)
@@ -280,10 +280,6 @@ void CloseCNFAAndroid( void * v )
     }
 
 }
-
-
-int AndroidHasPermissions(const char* perm_name);
-void AndroidRequestAppPermissions(const char * perm);
 
 
 void * InitCNFAAndroid( CNFACBType cb, const char * your_name, int reqSPSPlay, int reqSPSRec, int reqChannelsPlay, int reqChannelsRec, int sugBufferSize, const char * outputSelect, const char * inputSelect, void * opaque )
